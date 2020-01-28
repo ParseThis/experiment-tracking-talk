@@ -1,4 +1,5 @@
 # Main Walkthrough
+### Based on [MLFlow tutorial](https://www.mlflow.org/docs/latest/tutorials-and-examples/tutorial.html)
 
 Walkthrough `examples/sklearn_elasticnet_wine/train.py` high-level
 focus on mlflow tracking API:
@@ -78,7 +79,7 @@ show `model artifact` in ui
 Now we serve  that model with 
 `mlflow models serve -m ~/projects/mflow-talk/examples/sklearn_elasticnet_wine/mlruns/0/fbcc44095db54344adb920fa3095768d/artifacts/model -p 1234`
 
-Our model is now served on `localhost:1234/invocations`
+Our model is now served on `localhost:1234/invocations` we could query it with.
 
 `curl -X POST -H "Content-Type:application/json; format=pandas-split" --data
 '{"columns":["alcohol", "chlorides", "citric acid", "density", "fixed acidity",
@@ -88,3 +89,21 @@ dioxide", "volatile acidity"],"data":[[12.8, 0.029, 0.48, 0.98, 6.2, 29, 3.33,
 
 
 
+# What's More 
+
+[See Tracking
+API](https://www.mlflow.org/docs/latest/tutorials-and-examples/tutorial.html)
+
+- Runs can be or grouped under Experiments 
+- The backing store for the experiments dont have to be local (s3, MongoDB
+  etc)
+- Better API for Hyperaamater search
+- Training in Kubernetes cluster
+- Multistep workflows/Pipelines
+
+
+# Challenges:
+
+- Once you choose a platform, then you've got a vendor lock-in
+- To do anything other than running experiments locally you're going to write a
+  bit of ochestration code

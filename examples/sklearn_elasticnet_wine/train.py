@@ -34,13 +34,22 @@ if __name__ == "__main__":
     np.random.seed(42)
 
     # Read the wine-quality csv file from the URL
-    csv_url =\
-        'http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv'
-    try:
-        data = pd.read_csv(csv_url, sep=';')
-    except Exception as e:
-        logger.exception(
-            "Unable to download training & test CSV, check your internet connection. Error: %s", e)
+    FILENAME = "winequality-red.csv"
+    csv_url = \
+    f"http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/{FILENAME}"
+
+    if os.path.isfile(FILENAME):
+        data = pd.read_csv(FILENAME, sep=";")
+    else:
+        try:
+            data = pd.read_csv(csv_url, sep=";")
+        except Exception as e:
+            message = (f"Unable to download training & test CSV, check your\n"
+            "internet connection. Error: {e}") 
+            logger.exception(message)
+        finally:
+            sys.exit(1)
+
 
     # Split the data into training and test sets. (0.75, 0.25) split.
     train, test = train_test_split(data)
@@ -54,12 +63,17 @@ if __name__ == "__main__":
     # TALK NOTE Linear regression with combined L1 and L2 priors as regularizer.
     # alpha is weighting both losses ( how regularization we want) 
     # 0 l1_ratio is mixing paramter, regularizing using ush L2 regularization
-    # This'll set both params  to 0.5 by default 
+    # This"ll set both params  to 0.5 by default 
 
     alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5 
     l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
 
+    # TALK NOTE couldn't get this to work by just setting the env variable
+    remote_server_uri = os.environ.get("MLFLOW_TRACKING_URL", None) # set to your server URI
+    mlflow.set_tracking_uri(remote_server_uri)
+
     # TALK NOTE mlflow.start_run() return a ActiveRun with serves as a context manager
+    # also create mlruns/ dir that support the ui (if the folder doesn"t exit)
     with mlflow.start_run(): # 
         lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
         lr.fit(train_x, train_y)
@@ -83,5 +97,8 @@ if __name__ == "__main__":
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("time_cost",time_cost)
 
-        # TALK NOTE we're also serializing the elastic net model to disk
-        mlflow.sklearn.log_model(lr, "model")
+        # TALK NOTE we"re also serializing the elastic net model to disk
+        mlflow.sklearn.log_model(sk_model=lr, 
+                                 artifact_path="model",
+                                 # registered_model_name="WineClassifier" 
+                                )
