@@ -1,6 +1,7 @@
 # Main Walkthrough
 ### Based on [MLFlow tutorial](https://www.mlflow.org/docs/latest/tutorials-and-examples/tutorial.html)
 
+
 Walkthrough `examples/sklearn_elasticnet_wine/train.py` high-level
 focus on mlflow tracking API:
 
@@ -72,23 +73,30 @@ dependencies:
 Run a model in the specified environment
 from the project directory 
 
-run `mlflow run .`
+run `mlflow run . -P alpha=0.42`
+
+go find the model artifact
 
 show `model artifact` in ui
 
+# Serving packaged model
+
 Now we serve  that model with 
-`mlflow models serve -m ~/projects/mflow-talk/examples/sklearn_elasticnet_wine/mlruns/0/fbcc44095db54344adb920fa3095768d/artifacts/model -p 1234`
+```bash
+mlflow models serve \
+	-m ~/projects/mlflow-talk/examples/sklearn_elasticnet_wine/mlruns/0/4dba2c548d1b47cd8e47d5bd7b54983d/artifacts/model \
+	-p 1234
+
+```
+
 
 Our model is now served on `localhost:1234/invocations` we could query it with.
 
-`curl -X POST -H "Content-Type:application/json; format=pandas-split" --data
-'{"columns":["alcohol", "chlorides", "citric acid", "density", "fixed acidity",
-"free sulfur dioxide", "pH", "residual sugar", "sulphates", "total sulfur
-dioxide", "volatile acidity"],"data":[[12.8, 0.029, 0.48, 0.98, 6.2, 29, 3.33,
-1.2, 0.39, 75, 0.66]]}' http://127.0.0.1:1234/invocations`
+```bash
+curl -X POST -H "Content-Type:application/json; format=pandas-split" --data '{"columns":["alcohol", "chlorides", "citric acid", "density", "fixed acidity", "free sulfur dioxide", "pH", "residual sugar", "sulphates", "total sulfur dioxide", "volatile acidity"],"data":[[12.8, 0.029, 0.48, 0.98, 6.2, 29, 3.33, 1.2, 0.39, 75, 0.66]]}' http://127.0.0.1:1234/invocations 
+```
 
-
-
+So I could serve up my best model for testing
 # What's More 
 
 [See Tracking
@@ -102,8 +110,3 @@ API](https://www.mlflow.org/docs/latest/tutorials-and-examples/tutorial.html)
 - Multistep workflows/Pipelines
 
 
-# Challenges:
-
-- Once you choose a platform, then you've got a vendor lock-in
-- To do anything other than running experiments locally you're going to write a
-  bit of ochestration code

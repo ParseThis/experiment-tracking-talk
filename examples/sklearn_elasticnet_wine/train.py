@@ -15,6 +15,7 @@ from sklearn.linear_model import ElasticNet
 import mlflow
 import mlflow.sklearn
 from time import time
+import random
 
 import logging
 logging.basicConfig(level=logging.WARN)
@@ -68,9 +69,9 @@ if __name__ == "__main__":
     alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5 
     l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
 
-    # TALK NOTE couldn't get this to work by just setting the env variable
-    remote_server_uri = os.environ.get("MLFLOW_TRACKING_URL", None) # set to your server URI
-    mlflow.set_tracking_uri(remote_server_uri)
+    # TALK NOTE couldn't get this to work well by just setting the env variable
+    # remote_server_uri = os.environ.get("MLFLOW_TRACKING_URL", None) # set to your server URI
+    # mlflow.set_tracking_uri(remote_server_uri)
 
     # TALK NOTE mlflow.start_run() return a ActiveRun with serves as a context manager
     # also create mlruns/ dir that support the ui (if the folder doesn"t exit)
@@ -89,13 +90,16 @@ if __name__ == "__main__":
         print("  MAE: %s" % mae)
         print("  R2: %s" % r2)
 
-        # TALK NOTE writing messages to the mlflow object created above 
+        # TALK NOTE let make slightly interesting
+        # by addding a random inference speed
+        # which we calling 'time_cost'
         mlflow.log_param("alpha", alpha)
         mlflow.log_param("l1_ratio", l1_ratio)
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
         mlflow.log_metric("mae", mae)
-        mlflow.log_metric("time_cost",time_cost)
+        mlflow.log_metric("time_cost",
+                          random.randint(0, 10))
 
         # TALK NOTE we"re also serializing the elastic net model to disk
         mlflow.sklearn.log_model(sk_model=lr, 
